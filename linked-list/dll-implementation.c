@@ -4,7 +4,7 @@
 // Structure of linked-list node
 struct node {
     int data;
-    struct node *next;
+    struct node *prev, *next;
 };
 
 /* UTILITY FUNCTIONS */
@@ -33,7 +33,11 @@ struct node * insertFront(struct node *head, int val) {
         return head;
     }
     new->data = val;
+    new->prev = NULL;
     new->next = head;
+    if(head == NULL)
+        return new;
+    head->prev = new;
     return new;
 }
 
@@ -47,17 +51,17 @@ struct node * insertEnd(struct node *head, int val) {
         printf("Error: Heap memory overflow!\n");
         return head;
     }
-    new->data = val;
     new->next = NULL;
     if(head == NULL) {
-        head = new;
-        return head;
+        new->prev = NULL;
+        return new;
     }
     struct node *ptr = head;
     while(ptr->next != NULL) {
         ptr = ptr->next;
     }
     ptr->next = new;
+    new->prev = ptr;
     return head;
 }
 
@@ -67,11 +71,16 @@ struct node * insertEnd(struct node *head, int val) {
 */
 struct node * deleteFront(struct node *head) {
     if(head == NULL) {
-        printf("Error: Linked list is already empty!\n");
-        return NULL;
+        printf("Error: Index out of bound!\n");
+        return head;
     }
     struct node *ptr = head;
     head = head->next;
+    if(head == NULL) {
+        free(ptr);
+        return head;
+    }
+    head->prev = NULL;
     free(ptr);
     return head;
 }
@@ -82,7 +91,11 @@ struct node * deleteFront(struct node *head) {
 */
 struct node * deleteEnd(struct node *head) {
     if(head == NULL) {
-        printf("Error: Linked list is already empty!\n");
+        printf("Error: Index out of bound");
+        return head;
+    }
+    if(head->next == NULL) {
+        free(head);
         return NULL;
     }
     struct node *ptr1 = head, *ptr2;
@@ -101,7 +114,7 @@ struct node * deleteEnd(struct node *head) {
     Inserts a node at the specified index in the linked list
     Parameters: (Linked list, Index, Value to be inserted)
 */
-struct node * insert(struct node *head, int index, int val) {   // index starts at 0
+struct node * insert(struct node *head, int index, int val) {
     int len = count(head);
     if(index > len) {
         printf("Error: Index out of bound!\n");
@@ -111,22 +124,24 @@ struct node * insert(struct node *head, int index, int val) {   // index starts 
         return insertFront(head, val);
     if(index == len)
         return insertEnd(head, val);
-    struct node *tmp = (struct node *)malloc(sizeof(*tmp));
-    if(tmp == NULL) {
-        printf("Error: Heap memory overflow!\n");
+    struct node *new = (struct node *)malloc(sizeof(*new));
+    if(new == NULL) {
+        printf("Error: Heap memory overload!\n");
         return head;
     }
-    struct node *ptr = head;
-    while(index-1 != 0) {
-        ptr = ptr->next;
+    new->data = val;
+    struct node *ptr1 = head, *ptr2;
+    while(index != 0) {
+        ptr2 = ptr1;
+        ptr2 = ptr2->next;
         --index;
     }
-    tmp->data = val;
-    tmp->next = ptr->next;
-    ptr->next = tmp;
+    new->next = ptr1;
+    new->prev = ptr2;
+    ptr1->prev = new;
+    ptr2->next = new;
     return head;
 }
-
 
 /* 
     Deletes a node at the specified index in the linked list
@@ -149,10 +164,10 @@ struct node * delete(struct node *head, int index) {
         --index;
     }
     ptr2->next = ptr1->next;
+    ptr1->next->prev = ptr2;
     free(ptr1);
     return head;
 }
-
 
 /* 
     Prints all the data in the linked list
