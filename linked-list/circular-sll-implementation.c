@@ -14,10 +14,13 @@ struct node {
     Parameters: (Linked list)
 */
 int count(struct node *head) {
-    int count = 0;
-    while(head != NULL) {
+    if(head == NULL)
+        return 0;
+    int count = 1;
+    struct node *ptr = head->next;
+    while(ptr != head) {
         ++count;
-        head = head->next;
+        ptr = ptr->next;
     }
     return count;
 }
@@ -33,7 +36,15 @@ struct node * insertFront(struct node *head, int val) {
         return head;
     }
     new->data = val;
+    if(head == NULL) {
+        new->next = new;
+        return new;
+    }
     new->next = head;
+    struct node *ptr = head;
+    while(ptr->next != head)
+        ptr = ptr->next;
+    ptr->next = new;
     return new;
 }
 
@@ -48,16 +59,16 @@ struct node * insertEnd(struct node *head, int val) {
         return head;
     }
     new->data = val;
-    new->next = NULL;
     if(head == NULL) {
-        head = new;
-        return head;
+        new->next = new;
+        return new;
     }
     struct node *ptr = head;
-    while(ptr->next != NULL) {
+    while(ptr->next != head) {
         ptr = ptr->next;
     }
     ptr->next = new;
+    new->next = head;
     return head;
 }
 
@@ -65,14 +76,23 @@ struct node * insertEnd(struct node *head, int val) {
     Deletes front node of the linked list
     Parameters: (Linked list)
 */
+
 struct node * deleteFront(struct node *head) {
     if(head == NULL) {
         printf("Error: Linked list is already empty!\n");
         return NULL;
     }
-    struct node *ptr = head;
+    if(head->next == head) {
+        free(head);
+        return NULL;
+    }
+    struct node *tmp = head, *ptr = head;
+    while(ptr->next != head) {
+        ptr = ptr->next;
+    }
+    ptr->next = head->next;
     head = head->next;
-    free(ptr);
+    free(tmp);
     return head;
 }
 
@@ -85,12 +105,16 @@ struct node * deleteEnd(struct node *head) {
         printf("Error: Linked list is already empty!\n");
         return NULL;
     }
+    if(head->next == head) {
+        free(head);
+        return NULL;
+    }
     struct node *ptr1 = head, *ptr2;
-    while(ptr1->next != NULL) {
+    while(ptr1->next != head) {
         ptr2 = ptr1;
         ptr1 = ptr1->next;
     }
-    ptr2->next = NULL;
+    ptr2->next = head;
     free(ptr1);
     return head;
 }
@@ -127,7 +151,6 @@ struct node * insert(struct node *head, int index, int val) {   // index starts 
     return head;
 }
 
-
 /* 
     Deletes a node at the specified index in the linked list
     Parameters: (Linked list, Index)
@@ -153,16 +176,20 @@ struct node * delete(struct node *head, int index) {
     return head;
 }
 
-
 /* 
     Prints all the data in the linked list
     Parameters: (Linked list)
 */
 void printList(struct node *head) {
     printf("Linked list: ");
-    while(head != NULL) {
-        printf("%d ", head->data);
-        head = head->next;
+    struct node *ptr = head;
+    if(head != NULL) {
+        printf("%d ", ptr->data);
+        ptr = ptr->next;
+    }
+    while(ptr != head) {
+        printf("%d ", ptr->data);
+        ptr = ptr->next;
     }
     printf("\n");
 }

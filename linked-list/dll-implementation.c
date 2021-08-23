@@ -116,7 +116,7 @@ struct node * deleteEnd(struct node *head) {
 */
 struct node * insert(struct node *head, int index, int val) {
     int len = count(head);
-    if(index > len) {
+    if(index < 0 || index > len) {
         printf("Error: Index out of bound!\n");
         return head;
     }
@@ -149,7 +149,7 @@ struct node * insert(struct node *head, int index, int val) {
 */
 struct node * delete(struct node *head, int index) {
     int len = count(head);
-    if(index >= len) {
+    if(index < 0 || index >= len) {
         printf("Error: Index out of bound!\n");
         return head;
     }
